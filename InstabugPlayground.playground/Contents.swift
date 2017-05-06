@@ -101,18 +101,22 @@ class FilteredBugs {
                 }else{
                     closeBugsSincePastMonth.append(bug)
                 }
-                
-            }else{
-                if bug.state == .open{
-                    openBugsSinceOther.append(bug)
-                }else{
-                    closeBugsSinceOther.append(bug)
-                }
             }
+            if bug.state == .open{
+                openBugsSinceOther.append(bug)
+            }else{
+                closeBugsSinceOther.append(bug)
+            }
+
         }
-        
+
+        closeBugsSincePastWeek = closeBugsSincePastWeek + closeBugsSincePastDay
+        openBugsSincePastWeek = openBugsSincePastWeek + openBugsSincePastDay
+
+        closeBugsSincePastMonth = closeBugsSincePastWeek + closeBugsSincePastMonth
+        openBugsSincePastMonth = openBugsSincePastWeek + openBugsSincePastMonth
     }
-    
+
     func getBugsWith(timeRange:TimeRange,state:Bug.State?) ->  [Bug] {
         switch timeRange {
         case .pastDay:
@@ -202,6 +206,11 @@ class UnitTests : XCTestCase {
         XCTAssertEqual(bugs[0].comment, "Bug 1", "Invalid bug order")
     }
     
+    func testFindClosedBugsInThePastDay() {
+        let bugs = application.findBugs(state: .closed, timeRange: .pastDay)
+        XCTAssertTrue(bugs.count == 0, "Invalid number of bugs")
+    }
+    
     func testFindClosedBugsInThePastMonth() {
         
         
@@ -210,11 +219,23 @@ class UnitTests : XCTestCase {
         XCTAssertTrue(bugs.count == 1, "Invalid number of bugs")
     }
     
+    func testFindOpenBugsInThePastMonth() {
+        let bugs = application.findBugs(state: .open, timeRange: .pastMonth)
+        XCTAssertTrue(bugs.count == 2, "Invalid number of bugs")
+    }
+    
     func testFindClosedBugsInThePastWeek() {
         
         let bugs = application.findBugs(state: .closed, timeRange: .pastWeek)
         
         XCTAssertTrue(bugs.count == 0, "Invalid number of bugs")
+    }
+    
+    func testFindOpenBugsInThePastWeek() {
+        
+        let bugs = application.findBugs(state: .open, timeRange: .pastWeek)
+        
+        XCTAssertTrue(bugs.count == 2, "Invalid number of bugs")
     }
     
     func testInitializeBugWithJSON() {
